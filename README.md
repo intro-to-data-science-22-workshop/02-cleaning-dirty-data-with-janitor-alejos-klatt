@@ -36,9 +36,4 @@ The material in this repository is made available under the [MIT license](http:/
 ## Statement of contributions
 
 **Abigail Pena Alejos** prepared the practice material.
-
-<<<<<<< HEAD
 **Nikolina Klatt** prepared the presentation and the video.
-=======
-**Nikolina Klatt** prepared the presentation and the video.
->>>>>>> 72d8a3d (uploading the slides and practice material)
