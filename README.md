@@ -1,4 +1,4 @@
-# Working with dplyr
+# Data cleaning and exploring with janitor
 
 
 ## Summary
@@ -7,25 +7,27 @@ This repository provides materials for a session that is part of the [I2DS Tools
 
 ### Session contents
 
-This session will introduce you to the modern data wrangling workflow with R and dplyr. Data wrangling is one of the core steps in the data science workflow. dplyr is a grammar of data manipulation, providing a consistent set of verbs that help you solve the most common data manipulation challenges, including the manipulation of datasets and variables. 
+This session will introduce you to the data cleaning and exploring with the janitor package in R. Data cleaning and exploring are core steps in the data science workflow. janitor is a package with simple but powerful functions for cleaning and examining data that are optimized for user-friendliness.
 
 ### Main learning objectives
 
-The goals of this session are to (1) equip you with conceptual knowledge about the dplyr package and data wrangling workflow, (2) show you the three key verbs of the pacakge, and (3) provide you with practice material as well as some further readings.
-
+The goals of this session are to introduce you to the functions of janitor for (1) cleaning data, and for (2) data exploration and (3) provide you with practice material as well as some further resources.
 
 ## Instructors
 
-- Simon Munzert ([website](http://simonmunzert.github.io/), [twitter](https://twitter.com/simonsaysnothin))
-- Kermit the Frog ([website](https://en.wikipedia.org/wiki/Kermit_the_Frog), [twitter](https://twitter.com/KermitTheFrog))
+- Abigail Pena Alejos
+- Nikolina Klatt
 
+## Resources
 
-## Further resources
+Original sources:
+-	[GitHub repository for janitor](https://github.com/sfirke/janitor)
+- [janitor overview](https://sfirke.github.io/janitor/articles/janitor.html)
 
-- [dplyr overview at dplyr.tidyverse.org](https://dplyr.tidyverse.org/)
-- [Hands-on dplyr tutorial by Data School on YouTube](https://www.youtube.com/watch?v=jWjqLW-u3hc)
-- [R for Data Science book - part on data wrangling](https://r4ds.had.co.nz/wrangle-intro.html)
-
+Further resources:
++ [exploringdata.org - How to Clean Data: {janitor} Package](https://www.exploringdata.org/post/how-to-clean-data-janitor-package/)
++ [towardsdatascience.com - Cleaning and Exploring Data with the “janitor” Package ](https://towardsdatascience.com/cleaning-and-exploring-data-with-the-janitor-package-ee4a3edf085e)
++ [jenrichmond.rbind.io - Cleaning penguins with the janitor package ](http://jenrichmond.rbind.io/post/digging-into-the-janitor-package/)
 
 ## License
 
@@ -33,6 +35,10 @@ The material in this repository is made available under the [MIT license](http:/
 
 ## Statement of contributions
 
-**Simon Munzert** prepared the practice material and post-processed the recording.
+**Abigail Pena Alejos** prepared the practice material.
 
-**Kermit the Frog** prepared the presentation slides and recording. He also provided an example to the practice material.
+<<<<<<< HEAD
+**Nikolina Klatt** prepared the presentation and the video.
+=======
+**Nikolina Klatt** prepared the presentation and the video.
+>>>>>>> 72d8a3d (uploading the slides and practice material)

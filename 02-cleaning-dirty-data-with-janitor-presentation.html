@@ -1,0 +1,1005 @@
+<!DOCTYPE html>
+<html lang="" xml:lang="">
+  <head>
+    <title>Cleaning dirty data with {janitor}</title>
+    <meta charset="utf-8" />
+    <meta name="author" content="Abigail Pena Alejos &amp; Nikolina Klatt" />
+    <script src="presentation_files/header-attrs/header-attrs.js"></script>
+    <link href="presentation_files/remark-css/default.css" rel="stylesheet" />
+    <link href="presentation_files/remark-css/metropolis.css" rel="stylesheet" />
+    <link href="presentation_files/remark-css/metropolis-fonts.css" rel="stylesheet" />
+  </head>
+  <body>
+    <textarea id="source">
+class: center, middle, inverse, title-slide
+
+.title[
+# Cleaning dirty data with {janitor}
+]
+.subtitle[
+## Workshop: I2DS Tools for Data Science
+]
+.author[
+### Abigail Pena Alejos &amp; Nikolina Klatt
+]
+.institute[
+### Hertie School
+]
+.date[
+### November 21st 2022
+]
+
+---
+
+
+&lt;style type="text/css"&gt;
+@media print { # print out incremental slides; see https://stackoverflow.com/questions/56373198/get-xaringan-incremental-animations-to-print-to-pdf/56374619#56374619
+  .has-continuation {
+    display: block !important;
+  }
+}
+&lt;/style&gt;
+
+
+            
+# Agenda
+
+&lt;br&gt;
+
+.pull-left[
+&lt;br&gt;
+1. Overview
+
+2. Data cleaning 
+
+3. Data exploring
+
+4. Resources
+
+5. Summary
+]
+
+.pull-right-center[
+&lt;div align="left"&gt;
+&lt;br&gt;
+&lt;img src="images/nyt_data.png" width=400&gt;
+&lt;/div&gt;
+[The New York Times](https://www-1nytimes-1com-15dsaj73a00d2.hertie.hh-han.com/2014/08/18/technology/for-big-data-scientists-hurdle-to-insights-is-janitor-work.html?searchResultPosition=1) 
+]
+
+.pull-right-center[
+&lt;div align="left"&gt;
+&lt;br&gt;
+&lt;img src="images/janitor.jpeg" width=450&gt;
+&lt;/div&gt;
+
+]
+
+
+
+---
+# Overview
+
+.pull-left[
+&lt;br&gt;&lt;br&gt;
+{**janitor**} is a package built by [**Sam Firke**](https://samfirke.com/about/).
+
+- Simple functions for **cleaning** and **examining** data
+- Optimized for **user-friendliness**
+- For beginning and intermediate R users 
+- Advanced R users: with {janitor} they can do data wrangling faster 
+
+Let's get started &lt;br&gt;
+--&gt; `install.packages("janitor")` &lt;br&gt;
+--&gt; `library(janitor)`
+
+]
+.pull-right[
+&lt;div align="left"&gt;
+&lt;br&gt;
+&lt;img src="images/janitor_firke.png" width=500&gt;
+&lt;/div&gt; 
+
+&lt;div align="left"&gt;
+&lt;br&gt;
+&lt;img src="images/github_janitor.png" width=500&gt;
+&lt;/div&gt; 
+[GitHub janitor](https://github.com/sfirke/janitor)
+]
+
+---
+# Cleaning data 
+
+&lt;br&gt;
+**Clean data frame names with `clean_names()`**
+
+.pull-left[
+
+##tidyverse grammar
+
+Consistent variable names are important
+
+**snake_case** &lt;br&gt;
+*“Variable and function names should use only lowercase letters, numbers, and underscores. Use underscores (so called snake_case) to separate words within a name.”* &lt;br&gt; 
+[The tidyverse style guide](https://style.tidyverse.org/syntax.html)
+]
+
+.pull-right[
+&lt;div align="left"&gt;
+&lt;br&gt;
+&lt;img src="images/tidydata.jpeg" width=500&gt;
+&lt;/div&gt; 
+[Julie Lowndes and Allison Horst](https://www.openscapes.org/blog/2020/10/12/tidy-data/)
+]
+
+---
+
+# Cleaning data
+&lt;br&gt;
+**Clean data frame names with `clean_names()`**
+
+.pull-left[
+
+```r
+&gt; # Create a test data frame with dirty variable names
+&gt; dirty_df &lt;- as.data.frame(matrix(ncol = 7))
+&gt; names(dirty_df) &lt;- c("firstName", "a@b!c'ß??", 
++                "success.rate.in.%.(2022)",
++                "IDENTICAL", "IDENTICAL", 
++                "", "#")
+&gt; clean_df &lt;- dirty_df %&gt;%
++   clean_names() 
+&gt; 
+&gt; colnames(clean_df)
+```
+
+```
+## [1] "first_name"                   "a_b_css"                     
+## [3] "success_rate_in_percent_2022" "identical"                   
+## [5] "identical_2"                  "x"                           
+## [7] "number"
+```
+]
+
+---
+
+# Cleaning data
+&lt;br&gt;
+**Clean data frame names with `clean_names()`**
+
+.pull-left[
+
+```r
+&gt; # Create a test data frame with dirty variable names
+&gt; dirty_df &lt;- as.data.frame(matrix(ncol = 7))
+&gt; names(dirty_df) &lt;- c("firstName", "a@b!c'ß??", 
++                "success.rate.in.%.(2022)",
++                "IDENTICAL", "IDENTICAL", 
++                "", "#")
+&gt; clean_df &lt;- dirty_df %&gt;%
++   clean_names() 
+&gt; 
+&gt; colnames(clean_df)
+```
+
+```
+## [1] "first_name"                   "a_b_css"                     
+## [3] "success_rate_in_percent_2022" "identical"                   
+## [5] "identical_2"                  "x"                           
+## [7] "number"
+```
+]
+
+.pull-right[
++ **Consistent format** for letter cases and separators 
+    + **snake_case** is default, but other cases like camelCase are available
++ Handles **special characters** and **spaces**, including transliterating characters like `ß` to `ss`
++ Converts "%" to "**percent**" and "#" to "**number**" 
++ Adds numbers to **duplicated names**
++ **Spacing** (or lack thereof) around numbers is preserved
+
+- Works with the **%&gt;% operator**
+- Can be used for data frames and objects
+- `make_names_clean` also works for character vectors 
+]
+
+---
+
+# Cleaning data 
+
+
+```r
+&gt; # install.packages("palmerpenguins")
+&gt; library(palmerpenguins)
+&gt; dirty_penguins_df &lt;- penguins_raw
+&gt; colnames(dirty_penguins_df)
+```
+
+```
+##  [1] "studyName"           "Sample Number"       "Species"            
+##  [4] "Region"              "Island"              "Stage"              
+##  [7] "Individual ID"       "Clutch Completion"   "Date Egg"           
+## [10] "Culmen Length (mm)"  "Culmen Depth (mm)"   "Flipper Length (mm)"
+## [13] "Body Mass (g)"       "Sex"                 "Delta 15 N (o/oo)"  
+## [16] "Delta 13 C (o/oo)"   "Comments"
+```
+
+---
+
+# Cleaning data 
+
+
+```r
+&gt; # install.packages("palmerpenguins")
+&gt; library(palmerpenguins)
+&gt; dirty_penguins_df &lt;- penguins_raw
+&gt; colnames(dirty_penguins_df)
+```
+
+```
+##  [1] "studyName"           "Sample Number"       "Species"            
+##  [4] "Region"              "Island"              "Stage"              
+##  [7] "Individual ID"       "Clutch Completion"   "Date Egg"           
+## [10] "Culmen Length (mm)"  "Culmen Depth (mm)"   "Flipper Length (mm)"
+## [13] "Body Mass (g)"       "Sex"                 "Delta 15 N (o/oo)"  
+## [16] "Delta 13 C (o/oo)"   "Comments"
+```
+
+```r
+&gt; clean_penguins_df &lt;- penguins_raw %&gt;% 
++   clean_names()
+&gt; colnames(clean_penguins_df)
+```
+
+```
+##  [1] "study_name"        "sample_number"     "species"          
+##  [4] "region"            "island"            "stage"            
+##  [7] "individual_id"     "clutch_completion" "date_egg"         
+## [10] "culmen_length_mm"  "culmen_depth_mm"   "flipper_length_mm"
+## [13] "body_mass_g"       "sex"               "delta_15_n_o_oo"  
+## [16] "delta_13_c_o_oo"   "comments"
+```
+
+---
+
+# Cleaning data  
+
+&lt;br&gt;
+**Remove content with `remove_empty()`**
+
+- `remove_empty()` rows and columns &lt;br&gt;
+    + Cleans Excel files that contain empty rows and columns after being read into R &lt;br&gt;
+    + Adding `quiet = FALSE` let's you know how many rows or columns were removed.
+
+```r
+&gt; empty_df &lt;- data.frame(v1 = c(1, NA, 3),
++                 v2 = c(NA, NA, NA),
++                 v3 = c("a", NA, "b"))
+&gt;  
+&gt; empty_df %&gt;% 
++   remove_empty(c("rows", "cols"), quiet = FALSE) %&gt;% 
++   glimpse
+```
+
+```
+## Removing 1 empty rows of 3 rows total (33.3%).
+```
+
+```
+## Removing 1 empty columns of 3 columns total (Removed: v2).
+```
+
+```
+## Rows: 2
+## Columns: 2
+## $ v1 &lt;dbl&gt; 1, 3
+## $ v3 &lt;chr&gt; "a", "b"
+```
+
+
+---
+
+# Cleaning data
+
+&lt;br&gt;
+**Drop constant columns with `remove_constant()`**
+
+.pull-left[
+`remove_constant()` columns &lt;br&gt;
+Drops columns from a data frame that contain only a single constant value 
+
+
+```r
+&gt; adelie_df &lt;- clean_penguins_df %&gt;% 
++   filter(species == "Adelie Penguin (Pygoscelis adeliae)") 
+&gt; 
+&gt; adelie_df %&gt;% 
++   names()
+```
+
+```
+##  [1] "study_name"        "sample_number"     "species"          
+##  [4] "region"            "island"            "stage"            
+##  [7] "individual_id"     "clutch_completion" "date_egg"         
+## [10] "culmen_length_mm"  "culmen_depth_mm"   "flipper_length_mm"
+## [13] "body_mass_g"       "sex"               "delta_15_n_o_oo"  
+## [16] "delta_13_c_o_oo"   "comments"
+```
+]
+
+.pull-right[
+
+```r
+&gt; adelie_clean_df &lt;- adelie_df %&gt;% 
++   remove_constant() 
+&gt; 
+&gt; adelie_clean_df %&gt;% 
++   names()
+```
+
+```
+##  [1] "study_name"        "sample_number"     "island"           
+##  [4] "individual_id"     "clutch_completion" "date_egg"         
+##  [7] "culmen_length_mm"  "culmen_depth_mm"   "flipper_length_mm"
+## [10] "body_mass_g"       "sex"               "delta_15_n_o_oo"  
+## [13] "delta_13_c_o_oo"   "comments"
+```
+]
+
+---
+
+# Cleaning data 
+&lt;br&gt;
+**Check content of columns with `compare_df_cols()`**
+
+.pull-left[
+Imagine you have a set of data frames that you want to combine by binding the rows together but `rbind()` fails. You can check if the column classes match and see if they are **matching** by running `compare_df_cols()`. 
+
+- takes unquoted names of data frames, tibbles, or a list of data frames &lt;br&gt;
+
+--&gt; Returns a summary of how they compare 
+- What column types are there?
+- How do column types differ?
+- Which are missing or present in the different inputs?
+
+]
+
+.pull-right[
+
+```r
+&gt; chinstrap_df &lt;- clean_penguins_df %&gt;% 
++   filter(species == "Chinstrap penguin (Pygoscelis antarctica)") 
+&gt; 
+&gt; # rbind(adelie, chinstrap)
+&gt; 
+&gt; compare_df_cols(adelie_clean_df, chinstrap_df) %&gt;% 
++   tail()
+```
+
+```
+##      column_name adelie_clean_df chinstrap_df
+## 12        region            &lt;NA&gt;    character
+## 13 sample_number         numeric      numeric
+## 14           sex       character    character
+## 15       species            &lt;NA&gt;    character
+## 16         stage            &lt;NA&gt;    character
+## 17    study_name       character    character
+```
+]
+
+
+---
+# Exploring data
+
+&lt;br&gt;
+**`tabyl()` – a tidy, fully-featured approach to counting things**
+
+.pull-left[
+
+Why not use `table()`?
+- It doesn't work with the `%&gt;%` operator
+- It doesn't output data frames 
+- Its results are hard to format
+
+]
+
+.pull-right[
+**One variable**
+
+
+```r
+&gt; table(clean_penguins_df$sex)
+```
+
+```
+## 
+## FEMALE   MALE 
+##    165    168
+```
+]
+
+---
+# Exploring data
+
+&lt;br&gt;
+**`tabyl()` – a tidy, fully-featured approach to counting things**
+
+.pull-left[
+
+Why not use `table()`?
+- It doesn't work with the `%&gt;%` operator
+- It doesn't output data frames 
+- Its results are hard to format
+
+
+Instead better use `tabyl()`
+- Tidyverse-aligned - primarily built upon the `{dplyr}` and `{tidyr}` packages
+- Compatible with the `{knitr}` package
+- Useful for data exploration
+- Generate frequencies along with the percent of total 
+- Counts combinations of one, two, or three variables
+]
+
+.pull-right[
+**One variable**
+
+
+```r
+&gt; table(clean_penguins_df$sex)
+```
+
+```
+## 
+## FEMALE   MALE 
+##    165    168
+```
+
+```r
+&gt; tabyl(clean_penguins_df$sex)
+```
+
+```
+##  clean_penguins_df$sex   n    percent valid_percent
+##                 FEMALE 165 0.47965116     0.4954955
+##                   MALE 168 0.48837209     0.5045045
+##                   &lt;NA&gt;  11 0.03197674            NA
+```
+
+```r
+&gt; clean_penguins_no_na_df &lt;- clean_penguins_df %&gt;% 
++   drop_na(sex)
+```
+]
+
+
+---
+
+# Exploring data
+&lt;br&gt;
+**`tabyl()` – a tidy, fully-featured approach to counting things**
+
+**Two variables**
+Two-way tabyl / "crosstab" or "contingency" table
+
+
+
+```r
+&gt; clean_penguins_no_na_df %&gt;%
++   tabyl(island, sex)    
+```
+
+```
+##     island FEMALE MALE
+##     Biscoe     80   83
+##      Dream     61   62
+##  Torgersen     24   23
+```
+
+---
+
+# Exploring data
+&lt;br&gt;
+**`tabyl()` – a tidy, fully-featured approach to counting things**
+
+**Two variables**
+Two-way tabyl / "crosstab" or "contingency" table
+
+```r
+&gt; penguins_crosstab_table &lt;- clean_penguins_no_na_df %&gt;%
++   tabyl(island, sex) %&gt;%
++   adorn_totals("col") %&gt;%               # total in each row
++   adorn_percentages("row") %&gt;%          # percentage value per row
++   adorn_pct_formatting(digits = 2) %&gt;%  # rounded percentage value
++   adorn_ns() %&gt;%                        # adds the absolute numbers
++   adorn_title()                         # adds the variable name    
+&gt;   
+&gt; penguins_crosstab_table
+```
+
+```
+##                    sex                          
+##     island      FEMALE        MALE         Total
+##     Biscoe 49.08% (80) 50.92% (83) 100.00% (163)
+##      Dream 49.59% (61) 50.41% (62) 100.00% (123)
+##  Torgersen 51.06% (24) 48.94% (23) 100.00%  (47)
+```
+
+
+---
+
+# Exploring data
+&lt;br&gt;
+**`adorn_*()` options**
+.pull-left[
+- `tabyl()` can be formatted with a suite of `adorn_*` functions to add  information and for pretty formatting: &lt;br&gt;
+
++ **`adorn_totals()`**: Add totals row, column, or both.
++ **`adorn_percentages()`**: Calculate percentages along either axis or the entire tabyl
++ **`adorn_pct_formatting()`**: Format percentage columns, controlling the number of digits to display and whether to append the `%` symbol
++ **`adorn_rounding()`**: Round a data frame of numbers 
+]
+
+
+.pull-right[
+
+&lt;br&gt;&lt;br&gt;&lt;br&gt;
++ **`adorn_ns()`**: Add Ns to a tabyl - drawn from the tabyl's underlying counts or they can be supplied by the user
++ **`adorn_title()`**: Add a title to a tabyl - pptions include putting the column title in a new row on top of the data frame or combining the row and column titles in the data frame's first name slot.
+
+]
+
+---
+
+# Exploring data 
+
+**`tabyl()`** **Three variables**
+Three-way tabyl 
+
+```r
+&gt; clean_penguins_no_na_df %&gt;% tabyl(island, species, sex) %&gt;%
++   adorn_percentages("all") %&gt;%
++   adorn_pct_formatting(digits = 1) %&gt;% 
++   adorn_title() %&gt;% 
++   kable()
+```
+
+&lt;table class="kable_wrapper"&gt;
+&lt;tbody&gt;
+  &lt;tr&gt;
+   &lt;td&gt; 
+
+&lt;table&gt;
+ &lt;thead&gt;
+  &lt;tr&gt;
+   &lt;th style="text-align:left;"&gt;  &lt;/th&gt;
+   &lt;th style="text-align:left;"&gt; species &lt;/th&gt;
+   &lt;th style="text-align:left;"&gt;  &lt;/th&gt;
+   &lt;th style="text-align:left;"&gt;  &lt;/th&gt;
+  &lt;/tr&gt;
+ &lt;/thead&gt;
+&lt;tbody&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; island &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; Adelie Penguin (Pygoscelis adeliae) &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; Chinstrap penguin (Pygoscelis antarctica) &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; Gentoo penguin (Pygoscelis papua) &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; Biscoe &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; 13.3% &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; 0.0% &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; 35.2% &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; Dream &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; 16.4% &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; 20.6% &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; 0.0% &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; Torgersen &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; 14.5% &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; 0.0% &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; 0.0% &lt;/td&gt;
+  &lt;/tr&gt;
+&lt;/tbody&gt;
+&lt;/table&gt;
+
+ &lt;/td&gt;
+   &lt;td&gt; 
+
+&lt;table&gt;
+ &lt;thead&gt;
+  &lt;tr&gt;
+   &lt;th style="text-align:left;"&gt;  &lt;/th&gt;
+   &lt;th style="text-align:left;"&gt; species &lt;/th&gt;
+   &lt;th style="text-align:left;"&gt;  &lt;/th&gt;
+   &lt;th style="text-align:left;"&gt;  &lt;/th&gt;
+  &lt;/tr&gt;
+ &lt;/thead&gt;
+&lt;tbody&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; island &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; Adelie Penguin (Pygoscelis adeliae) &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; Chinstrap penguin (Pygoscelis antarctica) &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; Gentoo penguin (Pygoscelis papua) &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; Biscoe &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; 13.1% &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; 0.0% &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; 36.3% &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; Dream &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; 16.7% &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; 20.2% &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; 0.0% &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; Torgersen &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; 13.7% &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; 0.0% &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; 0.0% &lt;/td&gt;
+  &lt;/tr&gt;
+&lt;/tbody&gt;
+&lt;/table&gt;
+
+ &lt;/td&gt;
+  &lt;/tr&gt;
+&lt;/tbody&gt;
+&lt;/table&gt;
+
+
+---
+# Cleaning data 
+&lt;br&gt;
+
+### Fixing dates 
+
+.pull-left[
+- `excel_numeric_to_date()` &lt;br&gt; 
+Fix dates stored as serial numbers &lt;br&gt;
+Converts serial date numbers from Excel to class `Date`
+
+
+```r
+&gt; excel_numeric_to_date(44886)
+```
+
+```
+## [1] "2022-11-21"
+```
+]
+
+.pull-right[
+- `convert_to_date()` &lt;br&gt;
+Convert a mix of date and datetime formats to date
+
+
+```r
+&gt; convert_to_date(c("2020-02-29", "40000.1"))
+```
+
+```
+## [1] "2020-02-29" "2009-07-06"
+```
+
+```r
+&gt; convert_to_datetime(40000.1)
+```
+
+```
+## [1] "2009-07-06 02:24:00 UTC"
+```
+
+]
+
+---
+# Cleaning data 
+&lt;br&gt;
+
+### Rounding numbers 
+
+.pull-left[
+
+Careful: In base R `round()` uses **"banker's rounding"**, &lt;br&gt; 
+i.e., halves are rounded to the nearest *even* number.  
+
+
+```r
+&gt; numbers &lt;- c(3.5, 2.5)
+&gt; round(numbers)
+```
+
+```
+## [1] 4 2
+```
+
+Instead use: `round_half_up()` &lt;br&gt;
+directionally-consistent rounding behavior &lt;br&gt;
+
+
+```r
+&gt; round_half_up(numbers)
+```
+
+```
+## [1] 4 3
+```
+
+
+]
+
+.pull-right[
+`round_to_fraction()` &lt;br&gt;
+round decimals to precise fractions of a given denominator  
+
+
+```r
+&gt; round_to_fraction(0.175, denominator = 4)
+```
+
+```
+## [1] 0.25
+```
+
+```r
+&gt; round_to_fraction(0.2, denominator = 4)
+```
+
+```
+## [1] 0.25
+```
+
+```r
+&gt; round_to_fraction(0.25000000001, denominator = 4)
+```
+
+```
+## [1] 0.25
+```
+
+]
+
+---
+# Exploring data
+&lt;br&gt;
+**Detect duplicated records with `get_dupes()`**
+
+.pull-left[
+
+Checking for duplicated records is important because they can interfere with your tabulations in the analysis.
+{`janitor`} makes this tedious task simple. 
+
+`get_dupes()` &lt;br&gt;
+- Detects duplicate records during data cleaning 
+- Returns the records (and inserts a count of duplicates) so you can examine the potentially problematic cases
+]
+
+.pull-right[
+
+```r
+&gt; clean_penguins_df %&gt;% 
++   get_dupes(individual_id) %&gt;% 
++   head(6)
+```
+
+```
+## # A tibble: 6 × 18
+##   individual_id dupe_c…¹ study…² sampl…³ species region island stage clutc…⁴
+##   &lt;chr&gt;            &lt;int&gt; &lt;chr&gt;     &lt;dbl&gt; &lt;chr&gt;   &lt;chr&gt;  &lt;chr&gt;  &lt;chr&gt; &lt;chr&gt;  
+## 1 N11A1                2 PAL0708      21 Adelie… Anvers Biscoe Adul… Yes    
+## 2 N11A1                2 PAL0809      47 Gentoo… Anvers Biscoe Adul… No     
+## 3 N11A2                2 PAL0708      22 Adelie… Anvers Biscoe Adul… Yes    
+## 4 N11A2                2 PAL0809      48 Gentoo… Anvers Biscoe Adul… No     
+## 5 N12A1                2 PAL0708      23 Adelie… Anvers Biscoe Adul… Yes    
+## 6 N12A1                2 PAL0809      49 Gentoo… Anvers Biscoe Adul… Yes    
+## # … with 9 more variables: date_egg &lt;date&gt;, culmen_length_mm &lt;dbl&gt;,
+## #   culmen_depth_mm &lt;dbl&gt;, flipper_length_mm &lt;dbl&gt;, body_mass_g &lt;dbl&gt;,
+## #   sex &lt;chr&gt;, delta_15_n_o_oo &lt;dbl&gt;, delta_13_c_o_oo &lt;dbl&gt;,
+## #   comments &lt;chr&gt;, and abbreviated variable names ¹​dupe_count,
+## #   ²​study_name, ³​sample_number, ⁴​clutch_completion
+```
+]
+ 
+---
+
+# Resources
+&lt;br&gt;
+.pull-left[
+Original material:
+
++ [Package janitor documentation](https://cran.r-project.org/web/packages/janitor/janitor.pdf)
+
++ [GitHub Repository](https://github.com/sfirke/janitor)
+
+Further resources:
+
++ [exploringdata.org - How to Clean Data: {janitor} Package](https://www.exploringdata.org/post/how-to-clean-data-janitor-package/)
+
++ [towardsdatascience.com - Cleaning and Exploring Data with the “janitor” Package ](https://towardsdatascience.com/cleaning-and-exploring-data-with-the-janitor-package-ee4a3edf085e)
+
++ [jenrichmond.rbind.io - Cleaning penguins with the janitor package ](http://jenrichmond.rbind.io/post/digging-into-the-janitor-package/)
+
+
+]
+
+.pull-right[
+
+More on tidying data:&lt;br&gt;
+[tidyr cheatsheet](https://github.com/rstudio/cheatsheets/blob/main/tidyr.pdf)
+
+Unfortunately, there is no cheatsheet for {`janitor`}. &lt;br&gt;
+Here are two alternative tips: 
+
+- `ls("package:janitor")` gives you a list of all functions
+- or type `janitor::` in your console and you get to scroll up and down the list of all functions in the package. 
+
+BTW, this works for all packages ;)
+
+]
+
+---
+
+# Summary
+
+&lt;br&gt;
+.pull-left[
++ Integrate `{janitor}` into your data wrangling and cleaning pipeline
++ It works faster than regular functions from the `{tidyverse}`
++ It can help you to: 
+    + **quickly** clean variable names 
+    + remove empty rows and columns
+    + remove constant columns
+    + **easily** create **better** tables that work in the tidyverse, can be stored as data frames and are almost worth publishing! 
+
+]
+
+.pull-right[
+&lt;div align="left"&gt;
+
+&lt;img src="images/unsplash.jpg" width=500&gt;
+&lt;/div&gt; 
+## **Happy data cleaning!**
+]
+
+ 
+    </textarea>
+<style data-target="print-only">@media screen {.remark-slide-container{display:block;}.remark-slide-scaler{box-shadow:none;}}</style>
+<script src="https://remarkjs.com/downloads/remark-latest.min.js"></script>
+<script>var slideshow = remark.create({
+"highlightStyle": "github",
+"highlightLines": true,
+"countIncrementalSlides": false,
+"ratio": "16:9",
+"hash": true
+});
+if (window.HTMLWidgets) slideshow.on('afterShowSlide', function (slide) {
+  window.dispatchEvent(new Event('resize'));
+});
+(function(d) {
+  var s = d.createElement("style"), r = d.querySelector(".remark-slide-scaler");
+  if (!r) return;
+  s.type = "text/css"; s.innerHTML = "@page {size: " + r.style.width + " " + r.style.height +"; }";
+  d.head.appendChild(s);
+})(document);
+
+(function(d) {
+  var el = d.getElementsByClassName("remark-slides-area");
+  if (!el) return;
+  var slide, slides = slideshow.getSlides(), els = el[0].children;
+  for (var i = 1; i < slides.length; i++) {
+    slide = slides[i];
+    if (slide.properties.continued === "true" || slide.properties.count === "false") {
+      els[i - 1].className += ' has-continuation';
+    }
+  }
+  var s = d.createElement("style");
+  s.type = "text/css"; s.innerHTML = "@media print { .has-continuation { display: none; } }";
+  d.head.appendChild(s);
+})(document);
+// delete the temporary CSS (for displaying all slides initially) when the user
+// starts to view slides
+(function() {
+  var deleted = false;
+  slideshow.on('beforeShowSlide', function(slide) {
+    if (deleted) return;
+    var sheets = document.styleSheets, node;
+    for (var i = 0; i < sheets.length; i++) {
+      node = sheets[i].ownerNode;
+      if (node.dataset["target"] !== "print-only") continue;
+      node.parentNode.removeChild(node);
+    }
+    deleted = true;
+  });
+})();
+// add `data-at-shortcutkeys` attribute to <body> to resolve conflicts with JAWS
+// screen reader (see PR #262)
+(function(d) {
+  let res = {};
+  d.querySelectorAll('.remark-help-content table tr').forEach(tr => {
+    const t = tr.querySelector('td:nth-child(2)').innerText;
+    tr.querySelectorAll('td:first-child .key').forEach(key => {
+      const k = key.innerText;
+      if (/^[a-z]$/.test(k)) res[k] = t;  // must be a single letter (key)
+    });
+  });
+  d.body.setAttribute('data-at-shortcutkeys', JSON.stringify(res));
+})(document);
+(function() {
+  "use strict"
+  // Replace <script> tags in slides area to make them executable
+  var scripts = document.querySelectorAll(
+    '.remark-slides-area .remark-slide-container script'
+  );
+  if (!scripts.length) return;
+  for (var i = 0; i < scripts.length; i++) {
+    var s = document.createElement('script');
+    var code = document.createTextNode(scripts[i].textContent);
+    s.appendChild(code);
+    var scriptAttrs = scripts[i].attributes;
+    for (var j = 0; j < scriptAttrs.length; j++) {
+      s.setAttribute(scriptAttrs[j].name, scriptAttrs[j].value);
+    }
+    scripts[i].parentElement.replaceChild(s, scripts[i]);
+  }
+})();
+(function() {
+  var links = document.getElementsByTagName('a');
+  for (var i = 0; i < links.length; i++) {
+    if (/^(https?:)?\/\//.test(links[i].getAttribute('href'))) {
+      links[i].target = '_blank';
+    }
+  }
+})();
+// adds .remark-code-has-line-highlighted class to <pre> parent elements
+// of code chunks containing highlighted lines with class .remark-code-line-highlighted
+(function(d) {
+  const hlines = d.querySelectorAll('.remark-code-line-highlighted');
+  const preParents = [];
+  const findPreParent = function(line, p = 0) {
+    if (p > 1) return null; // traverse up no further than grandparent
+    const el = line.parentElement;
+    return el.tagName === "PRE" ? el : findPreParent(el, ++p);
+  };
+
+  for (let line of hlines) {
+    let pre = findPreParent(line);
+    if (pre && !preParents.includes(pre)) preParents.push(pre);
+  }
+  preParents.forEach(p => p.classList.add("remark-code-has-line-highlighted"));
+})(document);</script>
+
+<script>
+slideshow._releaseMath = function(el) {
+  var i, text, code, codes = el.getElementsByTagName('code');
+  for (i = 0; i < codes.length;) {
+    code = codes[i];
+    if (code.parentNode.tagName !== 'PRE' && code.childElementCount === 0) {
+      text = code.textContent;
+      if (/^\\\((.|\s)+\\\)$/.test(text) || /^\\\[(.|\s)+\\\]$/.test(text) ||
+          /^\$\$(.|\s)+\$\$$/.test(text) ||
+          /^\\begin\{([^}]+)\}(.|\s)+\\end\{[^}]+\}$/.test(text)) {
+        code.outerHTML = code.innerHTML;  // remove <code></code>
+        continue;
+      }
+    }
+    i++;
+  }
+};
+slideshow._releaseMath(document);
+</script>
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+(function () {
+  var script = document.createElement('script');
+  script.type = 'text/javascript';
+  script.src  = 'https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-MML-AM_CHTML';
+  if (location.protocol !== 'file:' && /^https?:/.test(script.src))
+    script.src  = script.src.replace(/^https?:/, '');
+  document.getElementsByTagName('head')[0].appendChild(script);
+})();
+</script>
+  </body>
+</html>

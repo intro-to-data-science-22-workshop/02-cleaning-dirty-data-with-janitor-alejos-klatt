@@ -1,0 +1,176 @@
+---
+title: "Janitor exercises"
+author: "Abigail Peña Alejos & Nikolina Klatt"
+date: "2022-11-13"
+output: 
+  html_document:
+    toc: TRUE
+    df_print: paged
+    number_sections: FALSE
+    highlight: tango
+    theme: lumen
+    toc_depth: 3
+    toc_float: true
+    css: custom.css 
+    self_contained: false
+  
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+Today we will check some of the basic functions offered by the `janitor package` that will help us save time when cleaning our data. Along with `janitor`, we will make use of `tidyverse`packages such as `dplyr` and `readr`. `kableExtra` is suggested to render nice tables. But it is up to you! 
+
+```{r, message = F}
+library(readr)
+library(tidyverse)
+library(janitor)
+library(kableExtra)
+```
+
+For this exercise we will use `crime_subset.csv` dataset taken from a real world data hosted at [Data.gov catalogue](https://catalog.data.gov/dataset). The dataset contains reported crimes in the Montgomery County in Maryland. (You can download the original dataset  [here](https://catalog.data.gov/dataset/crime)) 
+
+We import the .csv file 
+
+```{r, warning=FALSE, message=FALSE}
+
+crime_df <- read_delim("data/crime_subset.csv", 
+    delim = ";", escape_double = FALSE, trim_ws = TRUE)
+
+```
+
+Now, let's go!
+
+***
+
+
+## Getting our variables names in clean format with `clean_names()`
+
+We have talked in our presentation about naming convention in computing, for example for variable and subroutine names, and for file names. We have been recommended using `snake_case`, the style of writing in which each whitespace is replaced by an underscore `_` character, and each word is written in lowercase. Something like this: `my_awesome_df`. 
+
+However, this isn't the case for our dataset. 
+
+```{r}
+crime_df %>% 
+  glimpse()
+
+```
+
+**EXERCISE 1:** Change variable names of the data frame to follow `snake_case` convention.
+
+```{r}
+
+# insert your code here
+
+```
+Voilá! Now we have `snake_case` formatted variables! Btw, did you notice the function also took care of the / in `Dispatch/ Time` and replaced it with an underscore. Isn't it great?
+
+Let's pretend you are not really fond of `snake_case` because of personal reasons but you prefer the `camelCase`. You might also want to leave NIBRS and ID untouched. No problem! `clean_names()` got your back. Just change your preference in the argument `case =` to `upper_camel` and keep the abbreviation with the argument `abbreviations`. Check out `?clean_names()` for further information. 
+
+```{r, eval=FALSE}
+
+# insert your code here
+
+```
+
+## Detect duplicates with `get_dupes()`
+
+**EXERCISE 2:** Find out whether there are any duplicate values in the `crime_df` data frame
+
+```{r}
+
+# insert your code here
+
+```
+Uhlala, seems like our data needs some cleaning!
+
+
+## Remove content with `remove_empty()` and `remove_constant()` functions
+
+Our `crime_df` data contain several missing values, and a couple of rows/columns filled with NAs.
+
+**EXERCISE 3.1:** Create a subset called *tidy_crime* using the `remove_empty()`
+
+```{r}
+
+# insert your code here
+
+```
+
+**EXERCISE 3.2:** Using `crime_df`, subset the crimes committed in *Silver Spring district*, clean the data and get rid of the *police_distric_name* variable. 
+
+```{r}
+
+# insert your code here
+
+
+```
+
+## Check content of columns with `compare_df_colums`
+
+`compare_df_colums` is a pretty cool function to check how a group of dataset compare to each other and whether could be possible to merge them based on the number of variables and vector class. 
+
+**Exercise 4** Using `crime_df`, subset the crimes committed in *Wheaton*, clean the data and get rid of the *police_distric_name* variable. Compare the new subest with the *Silver Spring* subset. Check out what columns are missing or present in the different inputs. 
+
+
+```{r, echo = FALSE}
+
+# insert your code here
+
+```
+
+## Using `tabyl()` and `adorn_*()` options
+
+We know that `tabyl()`is useful to create contingency tables with 1, 2 or 3 variables, and we have learned that `adorn_*()` functions will help us add information such as total numbers, not to forget a  nice formatting for percentages.
+
+**EXERCISE 5.1:** Use the data frame *tidy_crime* to create a frequency table for *police_district_name* variable with percentages rounded to 1 digit after the comma.  
+
+```{r}
+
+# insert your code here
+
+```
+
+**EXERCISE 5.2:** Now, create a two-way contingency table for the *Silver Spring* subset and tell us what percentage corresponds to crime against property if there is 1 victim as result of the attack. DON'T USE `drop_na()`
+
+```{r}
+
+# insert your code here
+
+```
+## Finally, let's play with numbers & dates
+
+**Rounding up numbers with `round_half_up`**
+
+Create a vector of 10 elements. Create new vectors in which the numbers from vector 1 are rounded up to 1 and 0 digits respectively, then create a tibble under the name `funny_numbers` to compare. 
+
+
+```{r, message=FALSE}
+
+v1 <- runif(10, min=15, max=48)
+# insert your code here
+
+```
+
+
+**Playing with dates**
+
+Use the `excel_numeric_to_date()` function to convert Excel serial date numbers in *edates* to class `Date`
+
+```{r, message=FALSE}
+
+edates <- c(0, 59, 61, 1000, 45100)
+
+
+```
+
+## Sources
+
+[janitor package](https://cran.r-project.org/web/packages/janitor/janitor.pdf)
+
+[overview of janitor functions](https://cran.r-project.org/web/packages/janitor/vignettes/janitor.html#tabyl---a-better-version-of-table) 
+
+[cleaning penguins with the janitor packages](http://jenrichmond.rbind.io/post/digging-into-the-janitor-package/)
+
+[How to Clean Data: {janitor} Package](https://www.exploringdata.org/post/how-to-clean-data-janitor-package/)

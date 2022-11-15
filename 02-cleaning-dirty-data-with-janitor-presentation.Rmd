@@ -1,0 +1,588 @@
+---
+title: "Cleaning dirty data with {janitor}"
+subtitle: "Workshop: I2DS Tools for Data Science "
+author: "Abigail Pena Alejos & Nikolina Klatt"
+institute: "Hertie School"
+date: "November 21st 2022"
+output:
+  xaringan::moon_reader:
+    css: [default, metropolis, metropolis-fonts] 
+    lib_dir: presentation_files
+    nature:
+      highlightStyle: github
+      highlightLines: true
+      countIncrementalSlides: false
+      ratio: '16:9'
+      hash: true
+--- 
+
+```{css, echo=FALSE} 
+@media print { # print out incremental slides; see https://stackoverflow.com/questions/56373198/get-xaringan-incremental-animations-to-print-to-pdf/56374619#56374619
+  .has-continuation {
+    display: block !important;
+  }
+}
+```
+
+```{r setup, include=FALSE}
+# figures formatting setup
+options(htmltools.dir.version = FALSE)
+library(tidyverse)
+library(janitor)
+library(kableExtra)
+library(rvest)
+library(httr)
+library(knitr)
+library(readxl)
+opts_chunk$set(
+  prompt = T,
+  fig.align="center", #fig.width=6, fig.height=4.5, 
+  # out.width="748px", #out.length="520.75px",
+  dpi=300, #fig.path='Figs/',
+  cache=F, #echo=F, warning=F, message=F
+  engine.opts = list(bash = "-l")
+  )
+```
+            
+# Agenda
+
+<br>
+
+.pull-left[
+<br>
+1. Overview
+
+2. Data cleaning 
+
+3. Data exploring
+
+4. Resources
+
+5. Summary
+]
+
+.pull-right-center[
+<div align="left">
+<br>
+<img src="images/nyt_data.png" width=400>
+</div>
+[The New York Times](https://www-1nytimes-1com-15dsaj73a00d2.hertie.hh-han.com/2014/08/18/technology/for-big-data-scientists-hurdle-to-insights-is-janitor-work.html?searchResultPosition=1) 
+]
+
+.pull-right-center[
+<div align="left">
+<br>
+<img src="images/janitor.jpeg" width=450>
+</div>
+
+]
+
+
+
+---
+# Overview
+
+.pull-left[
+<br><br>
+{**janitor**} is a package built by [**Sam Firke**](https://samfirke.com/about/).
+
+- Simple functions for **cleaning** and **examining** data
+- Optimized for **user-friendliness**
+- For beginning and intermediate R users 
+- Advanced R users: with {janitor} they can do data wrangling faster 
+
+Let's get started <br>
+--> `install.packages("janitor")` <br>
+--> `library(janitor)`
+
+]
+.pull-right[
+<div align="left">
+<br>
+<img src="images/janitor_firke.png" width=500>
+</div> 
+
+<div align="left">
+<br>
+<img src="images/github_janitor.png" width=500>
+</div> 
+[GitHub janitor](https://github.com/sfirke/janitor)
+]
+
+---
+# Cleaning data 
+
+<br>
+**Clean data frame names with `clean_names()`**
+
+.pull-left[
+
+##tidyverse grammar
+
+Consistent variable names are important
+
+**snake_case** <br>
+*“Variable and function names should use only lowercase letters, numbers, and underscores. Use underscores (so called snake_case) to separate words within a name.”* <br> 
+[The tidyverse style guide](https://style.tidyverse.org/syntax.html)
+]
+
+.pull-right[
+<div align="left">
+<br>
+<img src="images/tidydata.jpeg" width=500>
+</div> 
+[Julie Lowndes and Allison Horst](https://www.openscapes.org/blog/2020/10/12/tidy-data/)
+]
+
+---
+
+# Cleaning data
+<br>
+**Clean data frame names with `clean_names()`**
+
+.pull-left[
+```{r}
+# Create a test data frame with dirty variable names
+dirty_df <- as.data.frame(matrix(ncol = 7))
+names(dirty_df) <- c("firstName", "a@b!c'ß??", 
+               "success.rate.in.%.(2022)",
+               "IDENTICAL", "IDENTICAL", 
+               "", "#")
+clean_df <- dirty_df %>%
+  clean_names() 
+
+colnames(clean_df)
+```
+]
+
+---
+
+# Cleaning data
+<br>
+**Clean data frame names with `clean_names()`**
+
+.pull-left[
+```{r}
+# Create a test data frame with dirty variable names
+dirty_df <- as.data.frame(matrix(ncol = 7))
+names(dirty_df) <- c("firstName", "a@b!c'ß??", 
+               "success.rate.in.%.(2022)",
+               "IDENTICAL", "IDENTICAL", 
+               "", "#")
+clean_df <- dirty_df %>%
+  clean_names() 
+
+colnames(clean_df)
+```
+]
+
+.pull-right[
++ **Consistent format** for letter cases and separators 
+    + **snake_case** is default, but other cases like camelCase are available
++ Handles **special characters** and **spaces**, including transliterating characters like `ß` to `ss`
++ Converts "%" to "**percent**" and "#" to "**number**" 
++ Adds numbers to **duplicated names**
++ **Spacing** (or lack thereof) around numbers is preserved
+
+- Works with the **%>% operator**
+- Can be used for data frames and objects
+- `make_names_clean` also works for character vectors 
+]
+
+---
+
+# Cleaning data 
+
+```{r}
+# install.packages("palmerpenguins")
+library(palmerpenguins)
+dirty_penguins_df <- penguins_raw
+colnames(dirty_penguins_df)
+
+```
+
+---
+
+# Cleaning data 
+
+```{r}
+# install.packages("palmerpenguins")
+library(palmerpenguins)
+dirty_penguins_df <- penguins_raw
+colnames(dirty_penguins_df)
+
+clean_penguins_df <- penguins_raw %>% 
+  clean_names()
+colnames(clean_penguins_df)
+```
+
+---
+
+# Cleaning data  
+
+<br>
+**Remove content with `remove_empty()`**
+
+- `remove_empty()` rows and columns <br>
+    + Cleans Excel files that contain empty rows and columns after being read into R <br>
+    + Adding `quiet = FALSE` let's you know how many rows or columns were removed.
+```{r}
+empty_df <- data.frame(v1 = c(1, NA, 3),
+                v2 = c(NA, NA, NA),
+                v3 = c("a", NA, "b"))
+ 
+empty_df %>% 
+  remove_empty(c("rows", "cols"), quiet = FALSE) %>% 
+  glimpse
+
+```
+
+
+---
+
+# Cleaning data
+
+<br>
+**Drop constant columns with `remove_constant()`**
+
+.pull-left[
+`remove_constant()` columns <br>
+Drops columns from a data frame that contain only a single constant value 
+
+```{r}
+adelie_df <- clean_penguins_df %>% 
+  filter(species == "Adelie Penguin (Pygoscelis adeliae)") 
+
+adelie_df %>% 
+  names()
+
+```
+]
+
+.pull-right[
+```{r}
+adelie_clean_df <- adelie_df %>% 
+  remove_constant() 
+
+adelie_clean_df %>% 
+  names()
+```
+]
+
+---
+
+# Cleaning data 
+<br>
+**Check content of columns with `compare_df_cols()`**
+
+.pull-left[
+Imagine you have a set of data frames that you want to combine by binding the rows together but `rbind()` fails. You can check if the column classes match and see if they are **matching** by running `compare_df_cols()`. 
+
+- takes unquoted names of data frames, tibbles, or a list of data frames <br>
+
+--> Returns a summary of how they compare 
+- What column types are there?
+- How do column types differ?
+- Which are missing or present in the different inputs?
+
+]
+
+.pull-right[
+```{r}
+chinstrap_df <- clean_penguins_df %>% 
+  filter(species == "Chinstrap penguin (Pygoscelis antarctica)") 
+
+# rbind(adelie, chinstrap)
+
+compare_df_cols(adelie_clean_df, chinstrap_df) %>% 
+  tail()
+
+```
+]
+
+
+---
+# Exploring data
+
+<br>
+**`tabyl()` – a tidy, fully-featured approach to counting things**
+
+.pull-left[
+
+Why not use `table()`?
+- It doesn't work with the `%>%` operator
+- It doesn't output data frames 
+- Its results are hard to format
+
+]
+
+.pull-right[
+**One variable**
+
+```{r}
+table(clean_penguins_df$sex)
+
+```
+]
+
+---
+# Exploring data
+
+<br>
+**`tabyl()` – a tidy, fully-featured approach to counting things**
+
+.pull-left[
+
+Why not use `table()`?
+- It doesn't work with the `%>%` operator
+- It doesn't output data frames 
+- Its results are hard to format
+
+
+Instead better use `tabyl()`
+- Tidyverse-aligned - primarily built upon the `{dplyr}` and `{tidyr}` packages
+- Compatible with the `{knitr}` package
+- Useful for data exploration
+- Generate frequencies along with the percent of total 
+- Counts combinations of one, two, or three variables
+]
+
+.pull-right[
+**One variable**
+
+```{r}
+table(clean_penguins_df$sex)
+tabyl(clean_penguins_df$sex)
+
+clean_penguins_no_na_df <- clean_penguins_df %>% 
+  drop_na(sex)
+
+```
+]
+
+
+---
+
+# Exploring data
+<br>
+**`tabyl()` – a tidy, fully-featured approach to counting things**
+
+**Two variables**
+Two-way tabyl / "crosstab" or "contingency" table
+
+
+```{r}
+clean_penguins_no_na_df %>%
+  tabyl(island, sex)    
+```
+
+---
+
+# Exploring data
+<br>
+**`tabyl()` – a tidy, fully-featured approach to counting things**
+
+**Two variables**
+Two-way tabyl / "crosstab" or "contingency" table
+```{r}
+penguins_crosstab_table <- clean_penguins_no_na_df %>%
+  tabyl(island, sex) %>%
+  adorn_totals("col") %>%               # total in each row
+  adorn_percentages("row") %>%          # percentage value per row
+  adorn_pct_formatting(digits = 2) %>%  # rounded percentage value
+  adorn_ns() %>%                        # adds the absolute numbers
+  adorn_title()                         # adds the variable name    
+  
+penguins_crosstab_table
+```
+
+
+---
+
+# Exploring data
+<br>
+**`adorn_*()` options**
+.pull-left[
+- `tabyl()` can be formatted with a suite of `adorn_*` functions to add  information and for pretty formatting: <br>
+
++ **`adorn_totals()`**: Add totals row, column, or both.
++ **`adorn_percentages()`**: Calculate percentages along either axis or the entire tabyl
++ **`adorn_pct_formatting()`**: Format percentage columns, controlling the number of digits to display and whether to append the `%` symbol
++ **`adorn_rounding()`**: Round a data frame of numbers 
+]
+
+
+.pull-right[
+
+<br><br><br>
++ **`adorn_ns()`**: Add Ns to a tabyl - drawn from the tabyl's underlying counts or they can be supplied by the user
++ **`adorn_title()`**: Add a title to a tabyl - pptions include putting the column title in a new row on top of the data frame or combining the row and column titles in the data frame's first name slot.
+
+]
+
+---
+
+# Exploring data 
+
+**`tabyl()`** **Three variables**
+Three-way tabyl 
+```{r}
+clean_penguins_no_na_df %>% tabyl(island, species, sex) %>%
+  adorn_percentages("all") %>%
+  adorn_pct_formatting(digits = 1) %>% 
+  adorn_title() %>% 
+  kable()
+```
+
+
+---
+# Cleaning data 
+<br>
+
+### Fixing dates 
+
+.pull-left[
+- `excel_numeric_to_date()` <br> 
+Fix dates stored as serial numbers <br>
+Converts serial date numbers from Excel to class `Date`
+
+```{r}
+excel_numeric_to_date(44886)
+```
+]
+
+.pull-right[
+- `convert_to_date()` <br>
+Convert a mix of date and datetime formats to date
+
+```{r}
+convert_to_date(c("2020-02-29", "40000.1"))
+convert_to_datetime(40000.1)
+```
+
+]
+
+---
+# Cleaning data 
+<br>
+
+### Rounding numbers 
+
+.pull-left[
+
+Careful: In base R `round()` uses **"banker's rounding"**, <br> 
+i.e., halves are rounded to the nearest *even* number.  
+
+```{r}
+numbers <- c(3.5, 2.5)
+round(numbers)
+```
+
+Instead use: `round_half_up()` <br>
+directionally-consistent rounding behavior <br>
+
+```{r}
+round_half_up(numbers)
+```
+
+
+]
+
+.pull-right[
+`round_to_fraction()` <br>
+round decimals to precise fractions of a given denominator  
+
+```{r}
+round_to_fraction(0.175, denominator = 4)
+round_to_fraction(0.2, denominator = 4)
+round_to_fraction(0.25000000001, denominator = 4)
+
+```
+
+]
+
+---
+# Exploring data
+<br>
+**Detect duplicated records with `get_dupes()`**
+
+.pull-left[
+
+Checking for duplicated records is important because they can interfere with your tabulations in the analysis.
+{`janitor`} makes this tedious task simple. 
+
+`get_dupes()` <br>
+- Detects duplicate records during data cleaning 
+- Returns the records (and inserts a count of duplicates) so you can examine the potentially problematic cases
+]
+
+.pull-right[
+```{r}
+clean_penguins_df %>% 
+  get_dupes(individual_id) %>% 
+  head(6)
+```
+]
+ 
+---
+
+# Resources
+<br>
+.pull-left[
+Original material:
+
++ [Package janitor documentation](https://cran.r-project.org/web/packages/janitor/janitor.pdf)
+
++ [GitHub Repository](https://github.com/sfirke/janitor)
+
+Further resources:
+
++ [exploringdata.org - How to Clean Data: {janitor} Package](https://www.exploringdata.org/post/how-to-clean-data-janitor-package/)
+
++ [towardsdatascience.com - Cleaning and Exploring Data with the “janitor” Package ](https://towardsdatascience.com/cleaning-and-exploring-data-with-the-janitor-package-ee4a3edf085e)
+
++ [jenrichmond.rbind.io - Cleaning penguins with the janitor package ](http://jenrichmond.rbind.io/post/digging-into-the-janitor-package/)
+
+
+]
+
+.pull-right[
+
+More on tidying data:<br>
+[tidyr cheatsheet](https://github.com/rstudio/cheatsheets/blob/main/tidyr.pdf)
+
+Unfortunately, there is no cheatsheet for {`janitor`}. <br>
+Here are two alternative tips: 
+
+- `ls("package:janitor")` gives you a list of all functions
+- or type `janitor::` in your console and you get to scroll up and down the list of all functions in the package. 
+
+BTW, this works for all packages ;)
+
+]
+
+---
+
+# Summary
+
+<br>
+.pull-left[
++ Integrate `{janitor}` into your data wrangling and cleaning pipeline
++ It works faster than regular functions from the `{tidyverse}`
++ It can help you to: 
+    + **quickly** clean variable names 
+    + remove empty rows and columns
+    + remove constant columns
+    + **easily** create **better** tables that work in the tidyverse, can be stored as data frames and are almost worth publishing! 
+
+]
+
+.pull-right[
+<div align="left">
+
+<img src="images/unsplash.jpg" width=500>
+</div> 
+## **Happy data cleaning!**
+]
+
+ 
