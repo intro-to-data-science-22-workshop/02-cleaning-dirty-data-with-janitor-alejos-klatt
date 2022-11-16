@@ -29,7 +29,7 @@ library(janitor)
 library(kableExtra)
 ```
 
-For this exercise we will use `crime_subset.csv` dataset taken from a real world data hosted at [Data.gov catalogue](https://catalog.data.gov/dataset). The dataset contains reported crimes in the Montgomery County in Maryland. (You can download the original dataset  [here](https://catalog.data.gov/dataset/crime)) 
+For this exercise we will use *crime_subset.csv* dataset taken from a real world data hosted at [Data.gov catalogue](https://catalog.data.gov/dataset), the U.S. Government’s open data portal. The dataset contains reported crimes in the Montgomery County in Maryland. (You can download the original [here](https://catalog.data.gov/dataset/crime)) 
 
 We import the .csv file 
 
@@ -57,7 +57,7 @@ crime_df %>%
 
 ```
 
-**EXERCISE 1:** Change variable names of the data frame to follow `snake_case` convention.
+**EXERCISE 1:** Change variable names of the dataframe to follow `snake_case` convention.
 
 ```{r}
 crime_df <- crime_df %>% 
@@ -66,9 +66,9 @@ crime_df %>%
   names()  
 
 ```
-Voilá! Now we have `snake_case` formatted variables! Btw, did you notice the function also took care of the / in `Dispatch/ Time` and replaced it with an underscore. Isn't it great?
+Voilá! Now we have `snake_case` formatted variables! Btw, did you notice the function also took care of the `/` in `Dispatch/Date` and replaced it with an underscore. Isn't it great?
 
-Let's pretend you are not really fond of `snake_case` because of personal reasons but you prefer the `camelCase`. You might also want to leave NIBRS and ID untouched. No problem! `clean_names()` got your back. Just change your preference in the argument `case =` to `upper_camel` and keep the abbreviation with the argument `abbreviations`. Check out `?clean_names()` for further information. 
+Let's pretend you are not really fond of `snake_case` format because you prefer the `camelCase`convention instead. You might also want to leave NIBRS and ID untouched. No problem! `clean_names()` got your back. Just change your preference in the argument `case =` to `upper_camel` and keep the abbreviation with the argument `abbreviations`. Check out `?clean_names()` for further information.
 
 ```{r}
 crime_df %>% 
@@ -78,7 +78,7 @@ crime_df %>%
 
 ## Detect duplicates with `get_dupes()`
 
-**Exercise 2:** Find out whether there are any duplicate values in `crime_df` data frame.
+**EXERCISE 2:** Find out whether there are any duplicate values in the *crime_df* dataframe
 
 ```{r}
 crime_df %>% 
@@ -91,6 +91,7 @@ Uhlala, seems like our data needs some cleaning!
 
 ## Remove content with `remove_empty()` and `remove_constant()` functions
 
+
 Our `crime_df` data contain several missing values, and a couple of rows/columns filled with NAs.
 
 **Exercise 3.1:** Create a subset called *tidy_crime* using the `remove_empty()`
@@ -102,7 +103,7 @@ tidy_crime <-  crime_df %>%
 glimpse(tidy_crime)
 ```
 
-**EXERCISE 3.2:** Using `crime_df`, subset the crimes committed in *Silver Spring district*, clean the data and get rid of the *police_distric_name* variable. 
+**EXERCISE 3.2:** From `crime_df`, subset the observation for crimes committed in *Silver Spring district*, clean the data and get rid of the *police_distric_name* variable. 
 
 ```{r}
 
@@ -123,7 +124,7 @@ crime_df %>%
 
 `compare_df_colums` is a pretty cool function to check how a group of dataset compare to each other and whether could be possible to merge them based on the number of variables and vector class. 
 
-**Exercise 4** Using `crime_df`, subset the crimes committed in *Wheaton*, clean the data and get rid of the *police_distric_name* variable. Compare the new subest with the *Silver Spring* subset. Check out what columns are missing or present in the different inputs. 
+**Exercise 4** From *crime_df*, subset the observation for crimes committed in *Wheaton district* , clean the data and get rid of the *police_distric_name* variable. Then compare *Wheaton* and *Silver Spring* subsets. Check out what columns are missing or present in the different inputs. 
 
 
 ```{r}
@@ -140,7 +141,7 @@ compare_df_cols(s_silver_spring, s_wheaton)
 
 We know that `tabyl()`is useful to create contingency tables with  1, 2 or 3 variables, and we have learned that `adorn_*()` functions will help us add information such as total numbers, not to forget a  nice formatting for percentages.
 
-**EXERCISE 5.1:** Use the data frame *tidy_crime* to create a frequency table for *police_district_name* variable with percentages rounded to 1 digit after the comma.  
+**EXERCISE 5.1:** Find out proportion of crime per district, round percentages to 1 digit.  
 
 ```{r}
   
@@ -149,8 +150,7 @@ tabyl(tidy_crime$police_district_name) %>%
 
 ```
 
-**EXERCISE 5.2:** Now, create a two-way contingency table for the *Silver Spring* subset and tell us what percentage corresponds to crime against property if there is 1 victim as result of the attack. DON'T USE `drop_na()`
-
+**EXERCISE 5.2:** For crimes committed in Silver Springs involving only one victim, find what percentage corresponds to property-related offences. DON'T USE `drop_na()`
 ```{r}
 
 s_silver_spring %>% 
@@ -166,8 +166,7 @@ adorn_title()
 
 **Rounding up numbers with `round_half_up`**
 
-Create a vector of 10 elements. Create new vectors in which the numbers from vector 1 are rounded up to 1 and 0 digits respectively, then create a tibble under the name `funny_numbers` to compare. 
-
+Following the example of *v1* vector, create 2 vectors in which the numbers from vector 1 are rounded up to 1 and 0 digits respectively. Bind the vectors into a tibble under the name `funny_numbers` to see how the numbers compare across columns
 
 ```{r}
 v1 <- runif(10, min=15, max=48)
